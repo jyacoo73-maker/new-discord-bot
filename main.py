@@ -6,6 +6,8 @@ import os
 import json
 from google.oauth2.service_account import Credentials
 import logging
+from flask import Flask
+from threading import Thread
 
 # ログ設定
 logging.basicConfig(level=logging.INFO)
@@ -57,6 +59,21 @@ async def on_ready():
     await tree.sync()
     logging.info("スラッシュコマンドの同期が完了しました。")
 
+# --- Webサーバー (Railway/Heroku用) ---    # <<< ここからブロックごと追加
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "Bot is alive!"
+
+def run():
+  app.run(host='0.0.0.0',port=8080)
+
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
+# --- ここまで追加 ---
+
 # --- Bot実行 ---
 if DISCORD_BOT_TOKEN and SPREADSHEET_NAME and GCP_SA_KEY_STR:
     keep_alive()
@@ -64,3 +81,4 @@ if DISCORD_BOT_TOKEN and SPREADSHEET_NAME and GCP_SA_KEY_STR:
 else:
 
     logging.error("必要な環境変数が設定されていません。")
+
